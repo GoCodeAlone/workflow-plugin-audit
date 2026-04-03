@@ -10,7 +10,10 @@ import (
 
 func TestDBSink_WriteAndQuery(t *testing.T) {
 	mock := &mockDBInvoker{rows: make(map[string][]map[string]any)}
-	sink := internal.NewDBSink(mock, "audit_events")
+	sink, err := internal.NewDBSink(mock, "audit_events")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	now := time.Now().UTC()
 	events := []internal.AuditEvent{

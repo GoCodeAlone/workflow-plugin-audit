@@ -3,8 +3,10 @@ package internal
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	sdk "github.com/GoCodeAlone/workflow/plugin/external/sdk"
@@ -19,10 +21,11 @@ type CollectorModule struct {
 	sub sdk.MessageSubscriber
 	pub sdk.MessagePublisher
 
-	eventCh chan AuditEvent
-	stopCh  chan struct{}
-	wg      sync.WaitGroup
-	sinksMu sync.RWMutex
+	eventCh      chan AuditEvent
+	stopCh       chan struct{}
+	wg           sync.WaitGroup
+	sinksMu      sync.RWMutex
+	droppedCount atomic.Int64
 }
 
 // CollectorConfig holds configuration for the collector module.
@@ -111,7 +114,8 @@ func (c *CollectorModule) Start(ctx context.Context) error {
 				select {
 				case c.eventCh <- ev:
 				default:
-					log.Printf("[audit] buffer full, dropping event %s", ev.ID)
+					c.droppedCount.Add(1)
+					log.Printf("[audit] buffer full, dropping event %s (total dropped: %d)", ev.ID, c.droppedCount.Load())
 				}
 				return nil
 			}); err != nil {
@@ -127,7 +131,14 @@ func (c *CollectorModule) Start(ctx context.Context) error {
 
 func (c *CollectorModule) Stop(ctx context.Context) error {
 	close(c.stopCh)
-	c.wg.Wait()
+
+	done := make(chan struct{})
+	go func() { c.wg.Wait(); close(done) }()
+	select {
+	case <-done:
+	case <-ctx.Done():
+		return fmt.Errorf("audit collector stop timed out: %w", ctx.Err())
+	}
 
 	if c.sub != nil {
 		for _, topic := range c.config.Topics {
@@ -193,7 +204,8 @@ func (c *CollectorModule) writeBatch(ctx context.Context, batch []AuditEvent) {
 
 // InvokeMethod implements ServiceInvoker for querying events from steps.
 func (c *CollectorModule) InvokeMethod(method string, args map[string]any) (map[string]any, error) {
-	if method == "query" {
+	switch method {
+	case "query":
 		q := parseQueryArgs(args)
 		c.sinksMu.RLock()
 		defer c.sinksMu.RUnlock()
@@ -205,6 +217,11 @@ func (c *CollectorModule) InvokeMethod(method string, args map[string]any) (map[
 			}
 		}
 		return map[string]any{"events": "[]", "count": 0}, nil
+	case "stats":
+		return map[string]any{
+			"dropped":  c.droppedCount.Load(),
+			"buffered": len(c.eventCh),
+		}, nil
 	}
 	return nil, nil
 }

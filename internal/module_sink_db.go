@@ -41,9 +41,11 @@ func (m *DBSinkModule) Stop(_ context.Context) error {
 }
 
 // SetInvoker sets the host DB invoker for the sink.
-func (m *DBSinkModule) SetInvoker(invoker DBInvoker) {
+func (m *DBSinkModule) SetInvoker(invoker DBInvoker) error {
 	m.invoker = invoker
-	m.sink = NewDBSink(invoker, m.tableName)
+	var err error
+	m.sink, err = NewDBSink(invoker, m.tableName)
+	return err
 }
 
 // Sink returns the underlying AuditSink for registration with the collector.
@@ -60,8 +62,9 @@ func (m *DBSinkModule) InvokeMethod(method string, args map[string]any) (map[str
 			"tableName": m.tableName,
 		}, nil
 	case "set_invoker":
-		// Allow wiring the DB invoker from host config
-		return map[string]any{"status": "ok"}, nil
+		// NOTE: Go interfaces cannot be passed through map[string]any.
+		// The DB invoker must be set programmatically via SetInvoker().
+		return nil, fmt.Errorf("set_invoker cannot be called via InvokeMethod; use SetInvoker() programmatically")
 	default:
 		return nil, fmt.Errorf("unknown method: %s", method)
 	}

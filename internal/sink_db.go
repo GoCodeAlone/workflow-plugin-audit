@@ -4,8 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"time"
 )
+
+var validTableName = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
 
 // DBInvoker abstracts the host engine's database service invocation.
 type DBInvoker interface {
@@ -19,11 +22,14 @@ type DBSink struct {
 }
 
 // NewDBSink creates a DB sink using a ServiceInvoker proxy.
-func NewDBSink(invoker DBInvoker, tableName string) *DBSink {
+func NewDBSink(invoker DBInvoker, tableName string) (*DBSink, error) {
 	if tableName == "" {
 		tableName = "audit_events"
 	}
-	return &DBSink{invoker: invoker, tableName: tableName}
+	if !validTableName.MatchString(tableName) {
+		return nil, fmt.Errorf("invalid table name: %q", tableName)
+	}
+	return &DBSink{invoker: invoker, tableName: tableName}, nil
 }
 
 func (d *DBSink) Write(ctx context.Context, events []AuditEvent) error {

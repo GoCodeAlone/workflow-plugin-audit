@@ -111,27 +111,36 @@ func (s *S3Sink) Query(ctx context.Context, q AuditQuery) ([]AuditEvent, error) 
 
 	for d := since; !d.After(until); d = d.AddDate(0, 0, 1) {
 		prefix := fmt.Sprintf("%s%s/", s.prefix, d.Format("2006/01/02"))
-		listOut, err := s.client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
-			Bucket: aws.String(s.bucket),
-			Prefix: aws.String(prefix),
-		})
-		if err != nil {
-			return nil, fmt.Errorf("list objects %s: %w", prefix, err)
-		}
-
-		for _, obj := range listOut.Contents {
-			events, err := s.downloadAndParse(ctx, *obj.Key)
+		var continuationToken *string
+		for {
+			listOut, err := s.client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+				Bucket:            aws.String(s.bucket),
+				Prefix:            aws.String(prefix),
+				ContinuationToken: continuationToken,
+			})
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("list objects %s: %w", prefix, err)
 			}
-			for _, ev := range events {
-				if matchesQuery(ev, q) {
-					allEvents = append(allEvents, ev)
-					if q.Limit > 0 && len(allEvents) >= q.Limit {
-						return allEvents, nil
+
+			for _, obj := range listOut.Contents {
+				events, err := s.downloadAndParse(ctx, *obj.Key)
+				if err != nil {
+					return nil, err
+				}
+				for _, ev := range events {
+					if matchesQuery(ev, q) {
+						allEvents = append(allEvents, ev)
+						if q.Limit > 0 && len(allEvents) >= q.Limit {
+							return allEvents, nil
+						}
 					}
 				}
 			}
+
+			if listOut.IsTruncated == nil || !*listOut.IsTruncated {
+				break
+			}
+			continuationToken = listOut.NextContinuationToken
 		}
 	}
 	return allEvents, nil

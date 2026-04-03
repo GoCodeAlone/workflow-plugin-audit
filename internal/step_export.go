@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
 
@@ -89,18 +90,32 @@ func (s *AuditExportStep) Execute(
 		}, nil
 	}
 
-	// Upload to S3 using a fresh client
-	if exportClient != nil {
-		_, err := exportClient.PutObject(ctx, &s3.PutObjectInput{
-			Bucket:          aws.String(bucket),
-			Key:             aws.String(key),
-			Body:            bytes.NewReader(buf.Bytes()),
-			ContentType:     aws.String("application/gzip"),
-			ContentEncoding: aws.String("gzip"),
-		})
-		if err != nil {
-			return nil, fmt.Errorf("upload to S3: %w", err)
+	// Initialize S3 client from AWS default config if not set (e.g. production)
+	client := exportClient
+	if client == nil {
+		region := stringFromMerged(merged, "region")
+		var opts []func(*awsconfig.LoadOptions) error
+		if region != "" {
+			opts = append(opts, awsconfig.WithRegion(region))
 		}
+		cfg, err := awsconfig.LoadDefaultConfig(ctx, opts...)
+		if err != nil {
+			return &sdk.StepResult{
+				Output: map[string]any{"error": "failed to load AWS config: " + err.Error()},
+			}, nil
+		}
+		client = s3.NewFromConfig(cfg)
+	}
+
+	_, err := client.PutObject(ctx, &s3.PutObjectInput{
+		Bucket:          aws.String(bucket),
+		Key:             aws.String(key),
+		Body:            bytes.NewReader(buf.Bytes()),
+		ContentType:     aws.String("application/gzip"),
+		ContentEncoding: aws.String("gzip"),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("upload to S3: %w", err)
 	}
 
 	return &sdk.StepResult{
