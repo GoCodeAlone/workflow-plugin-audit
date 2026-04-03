@@ -4,41 +4,48 @@ import (
 	sdk "github.com/GoCodeAlone/workflow/plugin/external/sdk"
 )
 
-// Manifest returns the plugin metadata used by the workflow engine for
-// discovery and capability negotiation.
 var Manifest = sdk.PluginManifest{
-	Name:        "workflow-plugin-TEMPLATE",
+	Name:        "workflow-plugin-audit",
 	Version:     "0.1.0",
-	Description: "TEMPLATE plugin for the workflow engine",
+	Description: "Compliance audit logging (EventBus → S3/DB sinks)",
 	Author:      "GoCodeAlone",
-	License:     "MIT",
-	ModuleTypes: []string{
-		// "example.module_type",
-	},
-	StepTypes: []string{
-		// "step.example_action",
-	},
 }
+
+var moduleTypes = []string{"audit.collector", "audit.sink.s3", "audit.sink.db"}
+var stepTypes = []string{"step.audit_query", "step.audit_export", "step.audit_annotate"}
 
 type plugin struct{}
 
-// NewPlugin creates a new plugin instance.
-func NewPlugin() sdk.PluginProvider {
-	return &plugin{}
-}
+func NewPlugin() sdk.PluginProvider { return &plugin{} }
 
-func (p *plugin) Manifest() sdk.PluginManifest {
-	return Manifest
-}
+func (p *plugin) Manifest() sdk.PluginManifest { return Manifest }
 
-func (p *plugin) ModuleFactories() map[string]sdk.ModuleFactory {
-	return map[string]sdk.ModuleFactory{
-		// "example.module_type": NewExampleModuleFactory(),
+func (p *plugin) ModuleTypes() []string { return moduleTypes }
+
+func (p *plugin) CreateModule(typeName, name string, config map[string]any) (sdk.ModuleInstance, error) {
+	switch typeName {
+	case "audit.collector":
+		return NewCollectorModule(name, config), nil
+	case "audit.sink.s3":
+		return NewS3SinkModule(name, config), nil
+	case "audit.sink.db":
+		return NewDBSinkModule(name, config), nil
+	default:
+		return nil, nil
 	}
 }
 
-func (p *plugin) StepFactories() map[string]sdk.StepFactory {
-	return map[string]sdk.StepFactory{
-		// "step.example_action": NewExampleStepFactory(),
+func (p *plugin) StepTypes() []string { return stepTypes }
+
+func (p *plugin) CreateStep(typeName, name string, config map[string]any) (sdk.StepInstance, error) {
+	switch typeName {
+	case "step.audit_query":
+		return NewAuditQueryStep(name, config), nil
+	case "step.audit_export":
+		return NewAuditExportStep(name, config), nil
+	case "step.audit_annotate":
+		return NewAuditAnnotateStep(name, config), nil
+	default:
+		return nil, nil
 	}
 }

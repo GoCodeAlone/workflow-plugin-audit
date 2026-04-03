@@ -4,7 +4,7 @@
 package main
 
 import (
-	"github.com/GoCodeAlone/workflow-plugin-TEMPLATE/internal"
+	"github.com/GoCodeAlone/workflow-plugin-audit/internal"
 	sdk "github.com/GoCodeAlone/workflow/plugin/external/sdk"
 )
 

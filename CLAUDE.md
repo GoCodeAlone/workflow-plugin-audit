@@ -12,12 +12,12 @@ go test ./... -v -race -count=1
 ## Cross-compile for deployment
 
 ```sh
-GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w" -o workflow-plugin-TEMPLATE ./cmd/workflow-plugin-TEMPLATE/
+GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w" -o workflow-plugin-audit ./cmd/workflow-plugin-audit/
 ```
 
 ## Structure
 
-- `cmd/workflow-plugin-TEMPLATE/main.go` — Plugin entry point (calls `sdk.Serve`)
+- `cmd/workflow-plugin-audit/main.go` — Plugin entry point (calls `sdk.Serve`)
 - `internal/plugin.go` — Plugin manifest, module factories, step factories
 - `internal/` — All module and step implementations
 - `plugin.json` — Capability manifest for the workflow registry

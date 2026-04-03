@@ -1,7 +1,7 @@
 {
-    "name": "workflow-plugin-TEMPLATE",
+    "name": "workflow-plugin-audit",
     "version": "0.1.0",
-    "description": "TEMPLATE plugin for the workflow engine",
+    "description": "Compliance audit logging (EventBus → S3/DB sinks)",
     "author": "GoCodeAlone",
     "license": "MIT",
     "type": "external",
@@ -9,12 +9,12 @@
     "private": false,
     "minEngineVersion": "0.3.55",
     "keywords": [],
-    "homepage": "https://github.com/GoCodeAlone/workflow-plugin-TEMPLATE",
-    "repository": "https://github.com/GoCodeAlone/workflow-plugin-TEMPLATE",
+    "homepage": "https://github.com/GoCodeAlone/workflow-plugin-audit",
+    "repository": "https://github.com/GoCodeAlone/workflow-plugin-audit",
     "capabilities": {
         "configProvider": false,
-        "moduleTypes": [],
-        "stepTypes": [],
+        "moduleTypes": ["audit.collector", "audit.sink.s3", "audit.sink.db"],
+        "stepTypes": ["step.audit_query", "step.audit_export", "step.audit_annotate"],
         "triggerTypes": []
     }
 }
