@@ -4,9 +4,13 @@ import (
 	sdk "github.com/GoCodeAlone/workflow/plugin/external/sdk"
 )
 
+// Version is set at build time via -ldflags
+// "-X github.com/GoCodeAlone/workflow-plugin-audit/internal.Version=X.Y.Z"
+var Version = "dev"
+
 var Manifest = sdk.PluginManifest{
 	Name:        "workflow-plugin-audit",
-	Version:     "0.1.0",
+	Version:     Version,
 	Description: "Compliance audit logging (EventBus → S3/DB sinks)",
 	Author:      "GoCodeAlone",
 }
