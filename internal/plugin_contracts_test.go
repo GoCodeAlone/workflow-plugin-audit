@@ -308,6 +308,18 @@ func TestTypedAuditQueryPreservesExplicitZeroLimit(t *testing.T) {
 	}
 }
 
+func TestTypedAuditQueryAcceptsFractionalSecondBounds(t *testing.T) {
+	_, err := typedAuditQuery()(context.Background(), sdk.TypedStepRequest[*contracts.AuditQueryConfig, *contracts.AuditQueryInput]{
+		Config: &contracts.AuditQueryConfig{
+			Since: "2026-04-27T10:00:00.123456789Z",
+			Until: "2026-04-27T10:00:01.123456789Z",
+		},
+	})
+	if err != nil {
+		t.Fatalf("typedAuditQuery rejected RFC3339Nano bounds: %v", err)
+	}
+}
+
 func TestQueryResponseFromMapRejectsMalformedEvents(t *testing.T) {
 	if _, err := queryResponseFromMap(map[string]any{"events": "not-json"}); err == nil {
 		t.Fatal("queryResponseFromMap accepted malformed events JSON")

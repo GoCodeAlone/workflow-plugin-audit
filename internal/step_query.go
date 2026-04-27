@@ -32,12 +32,12 @@ func (s *AuditQueryStep) Execute(
 	merged := mergeConfigs(s.config, config, current)
 
 	if v, ok := merged["since"].(string); ok {
-		if t, err := time.Parse(time.RFC3339, v); err == nil {
+		if t, err := time.Parse(time.RFC3339Nano, v); err == nil {
 			q.Since = t
 		}
 	}
 	if v, ok := merged["until"].(string); ok {
-		if t, err := time.Parse(time.RFC3339, v); err == nil {
+		if t, err := time.Parse(time.RFC3339Nano, v); err == nil {
 			q.Until = t
 		}
 	}

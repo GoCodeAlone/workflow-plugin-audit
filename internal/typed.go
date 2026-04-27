@@ -8,7 +8,6 @@ import (
 
 	"github.com/GoCodeAlone/workflow-plugin-audit/internal/contracts"
 	sdk "github.com/GoCodeAlone/workflow/plugin/external/sdk"
-	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -144,21 +143,6 @@ func unpackTypedArgs[T proto.Message](input *anypb.Any, target T) (T, error) {
 		return zero, err
 	}
 	return target, nil
-}
-
-func protoMessageToMap(msg proto.Message) map[string]any {
-	if msg == nil {
-		return nil
-	}
-	raw, err := (protojson.MarshalOptions{UseProtoNames: true}).Marshal(msg)
-	if err != nil {
-		return nil
-	}
-	values := map[string]any{}
-	if err := json.Unmarshal(raw, &values); err != nil {
-		return nil
-	}
-	return values
 }
 
 func collectorConfigToMap(cfg *contracts.CollectorConfig) (map[string]any, error) {
@@ -299,7 +283,10 @@ func exportInputToMap(input *contracts.AuditExportInput) (map[string]any, error)
 		}
 		events = append(events, auditEvent)
 	}
-	raw, _ := json.Marshal(events)
+	raw, err := json.Marshal(events)
+	if err != nil {
+		return nil, err
+	}
 	return compactMap(map[string]any{
 		"events": string(raw),
 		"bucket": input.GetBucket(),
