@@ -1,0 +1,79 @@
+{
+  "version": "v1",
+  "contracts": [
+    {
+      "kind": "module",
+      "type": "audit.collector",
+      "mode": "strict",
+      "config": "workflow.plugins.audit.v1.CollectorConfig"
+    },
+    {
+      "kind": "module",
+      "type": "audit.sink.s3",
+      "mode": "strict",
+      "config": "workflow.plugins.audit.v1.S3SinkConfig"
+    },
+    {
+      "kind": "module",
+      "type": "audit.sink.db",
+      "mode": "strict",
+      "config": "workflow.plugins.audit.v1.DBSinkConfig"
+    },
+    {
+      "kind": "step",
+      "type": "step.audit_query",
+      "mode": "strict",
+      "config": "workflow.plugins.audit.v1.AuditQueryConfig",
+      "input": "workflow.plugins.audit.v1.AuditQueryInput",
+      "output": "workflow.plugins.audit.v1.AuditQueryOutput"
+    },
+    {
+      "kind": "step",
+      "type": "step.audit_export",
+      "mode": "strict",
+      "config": "workflow.plugins.audit.v1.AuditExportConfig",
+      "input": "workflow.plugins.audit.v1.AuditExportInput",
+      "output": "workflow.plugins.audit.v1.AuditExportOutput"
+    },
+    {
+      "kind": "step",
+      "type": "step.audit_annotate",
+      "mode": "strict",
+      "config": "workflow.plugins.audit.v1.AuditAnnotateConfig",
+      "input": "workflow.plugins.audit.v1.AuditAnnotateInput",
+      "output": "workflow.plugins.audit.v1.AuditAnnotateOutput"
+    },
+    {
+      "kind": "service_method",
+      "serviceName": "audit.collector",
+      "method": "query",
+      "mode": "strict",
+      "input": "workflow.plugins.audit.v1.QueryRequest",
+      "output": "workflow.plugins.audit.v1.QueryResponse"
+    },
+    {
+      "kind": "service_method",
+      "serviceName": "audit.collector",
+      "method": "stats",
+      "mode": "strict",
+      "input": "workflow.plugins.audit.v1.StatsRequest",
+      "output": "workflow.plugins.audit.v1.StatsResponse"
+    },
+    {
+      "kind": "service_method",
+      "serviceName": "audit.sink.s3",
+      "method": "info",
+      "mode": "strict",
+      "input": "workflow.plugins.audit.v1.InfoRequest",
+      "output": "workflow.plugins.audit.v1.SinkInfoResponse"
+    },
+    {
+      "kind": "service_method",
+      "serviceName": "audit.sink.db",
+      "method": "info",
+      "mode": "strict",
+      "input": "workflow.plugins.audit.v1.InfoRequest",
+      "output": "workflow.plugins.audit.v1.SinkInfoResponse"
+    }
+  ]
+}

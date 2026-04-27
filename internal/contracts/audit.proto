@@ -1,0 +1,132 @@
+syntax = "proto3";
+
+package workflow.plugins.audit.v1;
+
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/GoCodeAlone/workflow-plugin-audit/internal/contracts;contracts";
+
+message CollectorConfig {
+  repeated string topics = 1;
+  int32 flush_interval = 2;
+  int32 buffer_size = 3;
+}
+
+message S3SinkConfig {
+  string bucket = 1;
+  string prefix = 2;
+  string region = 3;
+}
+
+message DBSinkConfig {
+  string table_name = 1;
+}
+
+message AuditQueryConfig {
+  string since = 1;
+  string until = 2;
+  string event_type = 3;
+  string workflow_id = 4;
+  string correlation_id = 5;
+  optional int32 limit = 6;
+}
+
+message AuditQueryInput {
+  string since = 1;
+  string until = 2;
+  string event_type = 3;
+  string workflow_id = 4;
+  string correlation_id = 5;
+  optional int32 limit = 6;
+}
+
+message AuditExportConfig {
+  string bucket = 1;
+  string prefix = 2;
+  string region = 3;
+}
+
+message AuditExportInput {
+  repeated AuditEvent events = 1;
+  string bucket = 2;
+  string prefix = 3;
+  string region = 4;
+}
+
+message AuditAnnotateConfig {
+  map<string, string> annotations = 1;
+  string key = 2;
+  string value = 3;
+}
+
+message AuditAnnotateInput {
+  map<string, string> annotations = 1;
+  string key = 2;
+  string value = 3;
+}
+
+message QueryRequest {
+  string since = 1;
+  string until = 2;
+  string event_type = 3;
+  string workflow_id = 4;
+  string correlation_id = 5;
+  optional int32 limit = 6;
+}
+
+message StatsRequest {}
+
+message InfoRequest {}
+
+message AuditEvent {
+  string id = 1;
+  string timestamp = 2;
+  string event_type = 3;
+  string workflow_id = 4;
+  string pipeline_id = 5;
+  string step_name = 6;
+  string actor = 7;
+  string correlation_id = 8;
+  google.protobuf.Struct data = 9;
+  map<string, string> annotations = 10;
+}
+
+message AuditQueryOutput {
+  repeated AuditEvent events = 1;
+  int32 count = 2;
+  string error = 100;
+}
+
+message AuditExportOutput {
+  int32 exported = 1;
+  string bucket = 2;
+  string key = 3;
+  int32 bytes_total = 4;
+  string error = 100;
+}
+
+message AuditAnnotateOutput {
+  map<string, string> annotations = 1;
+  int32 count = 2;
+  string error = 100;
+}
+
+message QueryResponse {
+  repeated AuditEvent events = 1;
+  int32 count = 2;
+  string error = 100;
+}
+
+message StatsResponse {
+  int64 dropped = 1;
+  int32 buffered = 2;
+  string error = 100;
+}
+
+message SinkInfoResponse {
+  string type = 1;
+  string bucket = 2;
+  string prefix = 3;
+  string table_name = 4;
+  string error = 100;
+}

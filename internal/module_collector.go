@@ -229,12 +229,12 @@ func (c *CollectorModule) InvokeMethod(method string, args map[string]any) (map[
 func parseQueryArgs(args map[string]any) AuditQuery {
 	q := AuditQuery{Limit: 100}
 	if v, ok := args["since"].(string); ok {
-		if t, err := time.Parse(time.RFC3339, v); err == nil {
+		if t, err := time.Parse(time.RFC3339Nano, v); err == nil {
 			q.Since = t
 		}
 	}
 	if v, ok := args["until"].(string); ok {
-		if t, err := time.Parse(time.RFC3339, v); err == nil {
+		if t, err := time.Parse(time.RFC3339Nano, v); err == nil {
 			q.Until = t
 		}
 	}

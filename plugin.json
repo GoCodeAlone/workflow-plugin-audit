@@ -1,20 +1,58 @@
 {
     "name": "workflow-plugin-audit",
-    "version": "0.1.0",
+    "version": "0.1.2",
     "description": "Compliance audit logging (EventBus → S3/DB sinks)",
     "author": "GoCodeAlone",
     "license": "MIT",
     "type": "external",
     "tier": "community",
     "private": false,
-    "minEngineVersion": "0.3.55",
+    "minEngineVersion": "0.19.0",
     "keywords": [],
     "homepage": "https://github.com/GoCodeAlone/workflow-plugin-audit",
     "repository": "https://github.com/GoCodeAlone/workflow-plugin-audit",
+    "downloads": [
+        {
+            "os": "linux",
+            "arch": "amd64",
+            "url": "https://github.com/GoCodeAlone/workflow-plugin-audit/releases/download/v0.1.2/workflow-plugin-audit-linux-amd64.tar.gz"
+        },
+        {
+            "os": "linux",
+            "arch": "arm64",
+            "url": "https://github.com/GoCodeAlone/workflow-plugin-audit/releases/download/v0.1.2/workflow-plugin-audit-linux-arm64.tar.gz"
+        },
+        {
+            "os": "darwin",
+            "arch": "amd64",
+            "url": "https://github.com/GoCodeAlone/workflow-plugin-audit/releases/download/v0.1.2/workflow-plugin-audit-darwin-amd64.tar.gz"
+        },
+        {
+            "os": "darwin",
+            "arch": "arm64",
+            "url": "https://github.com/GoCodeAlone/workflow-plugin-audit/releases/download/v0.1.2/workflow-plugin-audit-darwin-arm64.tar.gz"
+        },
+        {
+            "os": "windows",
+            "arch": "amd64",
+            "url": "https://github.com/GoCodeAlone/workflow-plugin-audit/releases/download/v0.1.2/workflow-plugin-audit-windows-amd64.tar.gz"
+        },
+        {
+            "os": "windows",
+            "arch": "arm64",
+            "url": "https://github.com/GoCodeAlone/workflow-plugin-audit/releases/download/v0.1.2/workflow-plugin-audit-windows-arm64.tar.gz"
+        }
+    ],
     "capabilities": {
         "configProvider": false,
         "moduleTypes": ["audit.collector", "audit.sink.s3", "audit.sink.db"],
         "stepTypes": ["step.audit_query", "step.audit_export", "step.audit_annotate"],
+        "serviceMethods": [
+            "audit.collector/query",
+            "audit.collector/stats",
+            "audit.sink.s3/info",
+            "audit.sink.db/info"
+        ],
         "triggerTypes": []
     }
 }
