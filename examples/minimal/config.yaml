@@ -1,0 +1,12 @@
+# Minimal config exercising workflow-plugin-audit.
+version: 1
+modules:
+  - name: audit-provider
+    type: audit.collector
+    config: {}
+workflows:
+  pipeline:
+    steps:
+      - name: example
+        type: step.audit_query
+        config: {}
